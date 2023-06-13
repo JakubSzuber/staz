@@ -11,9 +11,13 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-from os import getenv
+from dotenv import dotenv_values
 
-postgres_secret = getenv("POSTGRES_PASS")
+# Load the environment variables from the .env file
+env = dotenv_values()
+
+# Access the variables by their names
+postgres_secret = env['POSTGRES_PASS']
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
