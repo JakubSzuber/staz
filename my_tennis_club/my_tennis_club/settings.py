@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from os import getenv
+
+postgres_secret = getenv("POSTGRES_PASS")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -80,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'masteruser',
-        'PASSWORD': 'temporarydatabase345',
+        'PASSWORD': postgres_secret,
         'HOST': 'w3-django-project.cfkunbtnqrwt.eu-central-1.rds.amazonaws.com',
         'PORT': '5432'
     }
