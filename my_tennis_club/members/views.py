@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.template import loader
-from .models import Member
+from .models import Member, Item
 from django.shortcuts import render, redirect
 from .forms import RecordForm
 
@@ -45,7 +45,7 @@ def create_record(request):
         form = RecordForm()
     return render(request, 'create.html', {'form': form})
 
-def Item(request):
+def ItemL(request):
     myItem = Item.objects.all().values()
     template = loader.get_template('itemlist.html')
     context = {
