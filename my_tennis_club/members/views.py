@@ -1,7 +1,8 @@
 from django.http import HttpResponse
 from django.template import loader
 from .models import Member
-
+from django.shortcuts import render, redirect
+from .forms import RecordForm
 
 def main(request):
   template = loader.get_template('main.html')
@@ -29,3 +30,17 @@ def testing(request):
     'fruits': ['Apple', 'Banana', 'Cherry'],
   }
   return HttpResponse(template.render(context, request))
+
+def create(request):
+  template = loader.get_template('create.html')
+  return HttpResponse(template.render())
+
+def create_record(request):
+    if request.method == 'POST':
+        form = RecordForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/members')
+    else:
+        form = RecordForm()
+    return render(request, 'create.html', {'form': form})
