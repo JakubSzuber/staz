@@ -1,7 +1,7 @@
-{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
+    {% load static %}
   <link rel="stylesheet" href="{% static 'myglobal.css' %}">
   <title>{% block title %}{% endblock %}</title>
 </head>
@@ -9,11 +9,15 @@
 
 <div class="topnav">
   <a href="/">HOME</a> |
-  <a href="/members">MEMBERS</a> |
-  <a href="/create">CREATE</a>
+  <a href="/members">MEMBERS</a>
 </div>
 
 {% block content %}
+<form method="post" action="{% url 'create_record' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create Record</button>
+</form>
 {% endblock %}
 
 </body>
