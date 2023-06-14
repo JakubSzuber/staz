@@ -59,3 +59,16 @@ def ItemDet(request, id):
         'MyItem': Myitem,
     }
     return HttpResponse(template.render(context, request))
+def createIt(request):
+  template = loader.get_template('createIt.html')
+  return HttpResponse(template.render())
+
+def create_it_record(request):
+    if request.method == 'POST':
+        form = RecordForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/items')
+    else:
+        form = RecordForm()
+    return render(request, 'createIt.html', {'form': form})

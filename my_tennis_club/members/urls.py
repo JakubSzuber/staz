@@ -8,5 +8,6 @@ urlpatterns = [
     path('create/', views.create_record, name='create_record'),
     path('items/', views.ItemL, name='items'),
     path('items/detailed/<int:id>', views.ItemDet, name='itemdetail'),
+    path('items/create-item/', views.create_it_record, name='create_it_record'),
     path('testing/', views.testing, name='testing'),
 ]
