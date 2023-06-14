@@ -6,10 +6,11 @@
 
 {% block content %}
   <div class="main">
-    <h1>My Tennis Club</h1>
-
-    <h3>Members</h3>
-
-    <p>Check out all our <a href="members/">members</a></p>
+    <h1>Item list</h1>
+    <ol>
+      {% for x in myItems %}
+        <li>{{ x.typ }} {{ x.mark }}</li>
+      {% endfor %}
+    </ol>
   </div>
 {% endblock %}
