@@ -7,6 +7,6 @@ urlpatterns = [
     path('members/details/<int:id>', views.details, name='details'),
     path('create/', views.create_record, name='create_record'),
     path('items/', views.ItemL, name='items'),
-    path('item/details/<int:id>', views.ItemDet, name='itemdetail'),
+    path('items/detailed/<int:id>', views.ItemDet, name='itemdetail'),
     path('testing/', views.testing, name='testing'),
 ]
