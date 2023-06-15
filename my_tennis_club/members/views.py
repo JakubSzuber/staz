@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.template import loader
 from .models import Member, Item
 from django.shortcuts import render, redirect
-from .forms import RecordForm
+from .forms import RecordForm, RecordITForm
 
 def main(request):
   template = loader.get_template('main.html')
@@ -65,10 +65,10 @@ def createIt(request):
 
 def create_it_record(request):
     if request.method == 'POST':
-        form = RecordForm(request.POST)
+        form = RecordITForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('/items')
     else:
-        form = RecordForm()
+        form = RecordITForm()
     return render(request, 'createIt.html', {'form': form})
