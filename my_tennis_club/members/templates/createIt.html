@@ -14,7 +14,7 @@
 </div>
 
 {% block content %}
-<form method="post" action="{% url 'create_record' %}">
+<form method="post" action="{% url 'create_it_record' %}">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Create Record</button>

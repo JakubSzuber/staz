@@ -6,10 +6,9 @@
 
 {% block content %}
   <div class="main">
-    <h1>My Tennis Club</h1>
-
-    <h3>Members</h3>
-
-    <p>Check out all our <a href="members/">members</a></p>
+    <h1> {{ MyItem.typ }} {{ MyItem.mark }}</h1>
+    <p>Size: {{ MyItem.size }}</p>
+    <p>Color: {{ MyItem.color}}</p>
+    <p>Wear: {{ MyItem.wear}} </p>
   </div>
 {% endblock %}

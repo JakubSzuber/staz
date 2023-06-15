@@ -7,10 +7,11 @@
 {% block content %}
   <div class="main">
     <h1>Item list</h1>
-    <ol>
+    <ul>
       {% for x in myItems %}
-        <li>{{ x.typ }} {{ x.mark }}</li>
+        <li onclick="window.location = 'detailed/{{ x.id }}'">{{ x.typ }} {{ x.mark }}</li>
       {% endfor %}
-    </ol>
+    </ul>
   </div>
+<a href="create-item/" style="text-align:center;display:block;"> Add Item</a>
 {% endblock %}
