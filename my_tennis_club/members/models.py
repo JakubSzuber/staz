@@ -12,3 +12,8 @@ class Item(models.Model):
   size = models.CharField(max_length=8)
   color = models.CharField(max_length=128)
   wear = models.CharField(max_length=128)
+  SEX_CHOICES = [
+    ('Men', 'Men'),
+    ('Woman', 'Woman'),
+  ]
+  sex = models.CharField(max_length=128, choices=SEX_CHOICES, default='Unknown')
