@@ -88,7 +88,7 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'masteruser',
         'PASSWORD': postgres_secret,
-        'HOST': 'w3-django-project.cfkunbtnqrwt.eu-central-1.rds.amazonaws.com',
+        'HOST': 'w3-django-project.cu7tphbz5wzd.eu-north-1.rds.amazonaws.com',
         'PORT': '5432'
     }
 }
