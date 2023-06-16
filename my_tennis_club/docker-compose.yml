@@ -10,7 +10,6 @@ services:
 #      - POSTGRES_NAME=postgres
 #      - POSTGRES_USER=masteruser
 #      - POSTGRES_PASSWORD=mypassword345.
-
   db:
     image: postgres
     container_name: db
@@ -19,3 +18,14 @@ services:
       POSTGRES_PASSWORD: example
     ports:
       - "5432:5432"
+  api:
+#    env_file:
+#      - ../api_container/.env
+#    environment:
+#     - LOCAL_HOME=/run/desktop/mnt/host/c/Users/jszub
+    build: ../api_container
+    volumes:
+      - ../api_container:/code
+      - ${LOCAL_HOME}/.aws:/root/.aws
+    ports:
+      - "80:80"
