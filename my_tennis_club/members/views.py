@@ -68,7 +68,6 @@ def create_it_record(request):
         form = RecordITForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('/items')
     else:
         form = RecordITForm()
     return render(request, 'createIt.html', {'form': form})

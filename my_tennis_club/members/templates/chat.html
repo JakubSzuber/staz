@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Form with Button</title>
+  <script>
+    function addText() {
+      var textarea = document.getElementById("message");
+      var nameInput = document.getElementById("color");
+      var emailInput = document.getElementById("size");
+
+      // Create a new XMLHttpRequest object
+      var xhr = new XMLHttpRequest();
+
+      // Define the endpoint URL of your Docker container
+      var url = "http://localhost:80/desc";
+
+      // Construct the request URL with query parameters
+      var requestUrl = url + "?tag_color=" + encodeURIComponent(nameInput.value) + "&tag_size=" + encodeURIComponent(emailInput.value);
+
+      // Set up the request
+      xhr.open("GET", requestUrl, true);
+
+      // Define the callback function for the response
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          //var responseText = xhr.responseText;
+          var responseText = "CZERWONE BUTY";
+
+          textarea.value = responseText;
+        }
+      };
+
+      // Send the request
+      xhr.send();
+    }
+  </script>
+</head>
+<body>
+  <h1>Simple Form with Button</h1>
+  <form action="/submit" method="POST">
+    <label for="color">Color:</label>
+    <input type="text" id="color" name="color" required><br>
+
+    <label for="size">Size:</label>
+    <input type="text" id="size" name="size" required><br>
+
+    <label for="message">Message:</label><br>
+    <textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
+
+    <button type="button" onclick="addText()">Add Text</button>
+
+    <input type="submit" value="Submit">
+  </form>
+</body>
+</html>
