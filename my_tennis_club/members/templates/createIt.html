@@ -4,6 +4,9 @@
     {% load static %}
   <link rel="stylesheet" href="{% static 'myglobal.css' %}">
   <title>{% block title %}{% endblock %}</title>
+    <style>
+        background-color:black;
+    </style>
 </head>
 <body>
 
@@ -16,12 +19,86 @@
 {% block content %}
 <form method="post" action="{% url 'create_it_record' %}">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form.typ.label_tag }}
+    {{ form.typ }}
+    <br>
+    {{ form.mark.label_tag }}
+    {{ form.mark }}
+    <br>
+    {{ form.size.label_tag }}
+    {{ form.size }}
+    <br>
+    {{ form.color.label_tag }}
+    {{ form.color }}
+    <br>
+    {{ form.wear.label_tag }}
+    {{ form.wear }}
+    <br>
+    {{ form.sex.label_tag }}
+    {{ form.sex }}
+    <br>
+<label for="message">Message:</label><br>
+<textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
     <button type="submit">Create Record</button>
 </form>
+<button type="button" id="myButton"> Add Description</button>
 {% endblock %}
+<script>
+  function performAction() {
+    alert("Button clicked! Performing action...");
 
-<input value="test">
+    const typInput = document.querySelector('#id_typ');
+    const markInput = document.querySelector('#id_mark');
+    const sizeInput = document.querySelector('#id_size');
+    const colorInput = document.querySelector('#id_color');
+    const wearInput = document.querySelector('#id_wear');
+    const sexInput = document.querySelector('#id_sex');
+
+    const typValue = typInput.value;
+    const markValue = markInput.value;
+    const sizeValue = sizeInput.value;
+    const colorValue = colorInput.value;
+    const wearValue = wearInput.value;
+    const sexValue = sexInput.value;
+
+    alert(typValue + ', ' + markValue);
+
+    var xhr = new XMLHttpRequest();
+    var url = "http://localhost:8000/items";
+
+    var requestUrl =
+      url +
+      "?tag_type=" +
+      encodeURIComponent(typValue) +
+      "&tag_mark=" +
+      encodeURIComponent(markValue) +
+      "&tag_size=" +
+      encodeURIComponent(sizeValue) +
+      "&tag_color=" +
+      encodeURIComponent(colorValue) +
+      "&tag_wear=" +
+      encodeURIComponent(wearValue) +
+      "&tag_gender=" +
+      encodeURIComponent(sexValue);
+
+    xhr.open("GET", requestUrl, true);
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        var responseText = xhr.responseText;
+        document.getElementById("message").value = responseText;
+        alert("works: " + responseText);
+      }
+    };
+
+    xhr.send();
+  }
+
+  var button = document.getElementById("myButton");
+  button.addEventListener("click", performAction);
+</script>
+
+
 
 </body>
 </html>

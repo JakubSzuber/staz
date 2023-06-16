@@ -10,3 +10,12 @@ services:
 #      - POSTGRES_NAME=postgres
 #      - POSTGRES_USER=masteruser
 #      - POSTGRES_PASSWORD=mypassword345.
+
+  db:
+    image: postgres
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+    ports:
+      - "5432:5432"
