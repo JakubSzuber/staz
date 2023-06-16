@@ -26,6 +26,6 @@ services:
     build: ../api_container
     volumes:
       - ../api_container:/code
-      - ${LOCAL_HOME}/.aws:/root/.aws
+      - "${LOCAL_HOME}/.aws:/root/.aws"
     ports:
       - "80:80"
