@@ -132,14 +132,14 @@
 <label for="message">Message:</label><br>
 <textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
     <button type="submit">Create Record</button>
-<button type="button"> Add Description</button>
+<button type="button" id="myButton"> Add Description</button>
 </form>
 
 {% endblock %}
 
 <script>
   function performAction() {
-    //alert("Button clicked! Performing action...");
+    alert("Button clicked! Performing action, please wait a moment...");
 
     const typInput = document.querySelector('#id_typ');
     const markInput = document.querySelector('#id_mark');
@@ -172,7 +172,7 @@
         var jsonResponse = JSON.parse(responseText);
         var description = jsonResponse.Description;
         document.getElementById("message").value = description;
-        //alert("Description: " + description);
+        //alert("Please wait a moment...");
       }
     };
 
