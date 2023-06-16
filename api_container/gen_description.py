@@ -89,5 +89,5 @@ app.add_middleware(
 )
 @app.get("/desc")
 def read_root(tag_color: str, tag_size: str):
-#   return {"Description": image_caption_generator('but.jpg', tag_color, tag_size)}
-    return {"Description": 'Przychodzi baba do lekarza a lekarz mówi tak brzuch boli brzuch boli od pizzy ahahahha.'}
+   return {"Description": image_caption_generator('but.jpg', tag_color, tag_size)}
+#    return {"Description": 'Przychodzi baba do lekarza a lekarz mówi tak brzuch boli brzuch boli od pizzy ahahahha.'}
