@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    {% load static %}
+  {% load static %}
   <link rel="stylesheet" href="{% static 'myglobal.css' %}">
   <title>{% block title %}{% endblock %}</title>
-    <style>
-        background-color:black;
-    </style>
+  <style>
+    background-color:black;
+  </style>
 </head>
 <body>
 
 <div class="topnav">
   <a href="/">HOME</a> |
   <a href="/members">MEMBERS</a> |
-    <a href="/items">ITEMS</a>
+  <a href="/items">ITEMS</a>
 </div>
 
 {% block content %}
@@ -37,15 +37,16 @@
     {{ form.sex.label_tag }}
     {{ form.sex }}
     <br>
-<label for="message">Message:</label><br>
-<textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
+    <label for="message">Message:</label><br>
+    <textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
     <button type="submit">Create Record</button>
 </form>
-<button type="button" id="myButton"> Add Description</button>
+<button type="button" id="myButton">Add Description</button>
 {% endblock %}
+
 <script>
   function performAction() {
-    alert("Button clicked! Performing action...");
+    //alert("Button clicked! Performing action...");
 
     const typInput = document.querySelector('#id_typ');
     const markInput = document.querySelector('#id_mark');
@@ -61,33 +62,24 @@
     const wearValue = wearInput.value;
     const sexValue = sexInput.value;
 
-    alert(typValue + ', ' + markValue);
-
     var xhr = new XMLHttpRequest();
-    var url = "http://localhost:8000/items";
-
-    var requestUrl =
-      url +
-      "?tag_type=" +
-      encodeURIComponent(typValue) +
-      "&tag_mark=" +
-      encodeURIComponent(markValue) +
-      "&tag_size=" +
+    var url =
+      "http://localhost/desc" +
+      "?tag_size=" +
       encodeURIComponent(sizeValue) +
       "&tag_color=" +
-      encodeURIComponent(colorValue) +
-      "&tag_wear=" +
-      encodeURIComponent(wearValue) +
-      "&tag_gender=" +
-      encodeURIComponent(sexValue);
+      encodeURIComponent(colorValue);
 
-    xhr.open("GET", requestUrl, true);
+    //alert(url);
+    xhr.open("GET", url, true);
 
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4 && xhr.status === 200) {
         var responseText = xhr.responseText;
-        document.getElementById("message").value = responseText;
-        alert("works: " + responseText);
+        var jsonResponse = JSON.parse(responseText);
+        var description = jsonResponse.Description;
+        document.getElementById("message").value = description;
+        //alert("Description: " + description);
       }
     };
 
@@ -97,8 +89,6 @@
   var button = document.getElementById("myButton");
   button.addEventListener("click", performAction);
 </script>
-
-
 
 </body>
 </html>

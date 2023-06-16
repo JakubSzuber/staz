@@ -5,6 +5,8 @@ import openai
 import requests
 from fastapi import FastAPI
 from dotenv import dotenv_values
+from fastapi.middleware.cors import CORSMiddleware
+
 
 # Load the environment variables from the .env file
 env = dotenv_values()
@@ -79,7 +81,13 @@ def image_caption_generator(image_path, tag_color, tag_size):
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.get("/desc")
 def read_root(tag_color: str, tag_size: str):
-    return {"Description": image_caption_generator('but.jpg', tag_color, tag_size)}
-#    return {"Description": 'cos'}
+#   return {"Description": image_caption_generator('but.jpg', tag_color, tag_size)}
+    return {"Description": 'Przychodzi baba do lekarza a lekarz mówi tak brzuch boli brzuch boli od pizzy ahahahha.'}
