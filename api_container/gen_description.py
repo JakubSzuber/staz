@@ -5,12 +5,17 @@ import openai
 import requests
 from dotenv import dotenv_values
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Request, UploadFile, File, Form
+from fastapi import FastAPI, Request, UploadFile, File, Form, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from typing import List
 from fastapi_healthcheck import HealthCheckFactory, healthCheckRoute
+import jwt
+from jose import jwt, exceptions
+import datetime
 
 
 # Load the environment variables from the .env file
@@ -123,34 +128,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-@app.post("/desc")
-def read_root(tag_color: str, tag_size: str, image: UploadFile):
-    file_location = f"files/{image.filename}"
-    os.makedirs(os.path.dirname(file_location), exist_ok=True)
-    with open(file_location, "wb+") as file_object:
-        file_object.write(image.file.read())
-    #return {"info": f"file '{image.filename}' saved at '{file_location}'", "tag_color": tag_color, "tag_size": tag_size}
-    #return {"Description": 'Opis dziala. Opis dziala. Opis dzila.'}
-    return {"Description": image_caption_generator(file_location, tag_color, tag_size)}
 
-
-@app.get("/test-return-image")  # Enpoint for tetsing purposes
-def return_image():
-    base_directory = os.path.dirname(os.path.abspath(__file__))
-    file_location = os.path.join(base_directory, "tmp/tmp.jpg")
-    return FileResponse(file_location, media_type="image/jpeg")
-
-
-# -------------------------------------------- Playground --------------------------------------------
-
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
-import jwt
-from jose import jwt, exceptions
-import datetime
-
-#app = FastAPI()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -197,6 +175,31 @@ async def generate_token(username: str, password: str):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     access_token = create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.post("/desc")
+def read_root(
+    tag_color: str,
+    tag_size: str,
+    image: UploadFile,
+    current_user: User = Depends(get_current_user),
+):
+    file_location = f"files/{image.filename}"
+    os.makedirs(os.path.dirname(file_location), exist_ok=True)
+    with open(file_location, "wb+") as file_object:
+        file_object.write(image.file.read())
+    return {"Description": image_caption_generator(file_location, tag_color, tag_size)}
+
+#
+# @app.get("/test-return-image")  # Enpoint for tetsing purposes
+# def return_image():
+#     base_directory = os.path.dirname(os.path.abspath(__file__))
+#     file_location = os.path.join(base_directory, "tmp/tmp.jpg")
+#     return FileResponse(file_location, media_type="image/jpeg")
+
+
+# -------------------------------------------- Playground --------------------------------------------
+
 
 
 @app.get("/users/me")
