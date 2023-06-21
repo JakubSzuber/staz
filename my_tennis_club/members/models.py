@@ -17,3 +17,4 @@ class Item(models.Model):
     ('Woman', 'Woman'),
   ]
   sex = models.CharField(max_length=128, choices=SEX_CHOICES, default='Unknown')
+  image = models.ImageField(upload_to='item_images/', null=True)

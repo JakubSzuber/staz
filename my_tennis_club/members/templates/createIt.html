@@ -97,6 +97,7 @@
 
     #myButton {
         position: relative;
+        background-color: gray;
     }
   </style>
     </head>
@@ -109,7 +110,7 @@
 </div>
 
 {% block content %}
-<form method="post" action="{% url 'create_it_record' %}">
+<form method="post" enctype="multipart/form-data" action="{% url 'create_it_record' %}">
     {% csrf_token %}
     {{ form.typ.label_tag }}
     {{ form.typ }}
@@ -129,59 +130,61 @@
     {{ form.sex.label_tag }}
     {{ form.sex }}
     <br>
-<label for="message">Message:</label><br>
-<textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
+    <input type="file" name="image">
+    <br>
+    <label for="message">Message:</label><br>
+    <textarea id="message" name="message" rows="4" cols="50" required>{{ description }}</textarea><br>
     <button type="submit">Create Record</button>
-<button type="button" id="myButton"> Add Description</button>
+    <button type="button" id="myButton"> Add Description</button>
 </form>
 
 {% endblock %}
 
-<script>
-  function performAction() {
-    alert("Button clicked! Performing action, please wait a moment...");
+<!--<script>-->
+<!--  function performAction() {-->
+<!--    alert("Button clicked! Performing action, please wait a moment...");-->
 
-    const typInput = document.querySelector('#id_typ');
-    const markInput = document.querySelector('#id_mark');
-    const sizeInput = document.querySelector('#id_size');
-    const colorInput = document.querySelector('#id_color');
-    const wearInput = document.querySelector('#id_wear');
-    const sexInput = document.querySelector('#id_sex');
+<!--    const typInput = document.querySelector('#id_typ');-->
+<!--    const markInput = document.querySelector('#id_mark');-->
+<!--    const sizeInput = document.querySelector('#id_size');-->
+<!--    const colorInput = document.querySelector('#id_color');-->
+<!--    const wearInput = document.querySelector('#id_wear');-->
+<!--    const sexInput = document.querySelector('#id_sex');-->
 
-    const typValue = typInput.value;
-    const markValue = markInput.value;
-    const sizeValue = sizeInput.value;
-    const colorValue = colorInput.value;
-    const wearValue = wearInput.value;
-    const sexValue = sexInput.value;
+<!--    const typValue = typInput.value;-->
+<!--    const markValue = markInput.value;-->
+<!--    const sizeValue = sizeInput.value;-->
+<!--    const colorValue = colorInput.value;-->
+<!--    const wearValue = wearInput.value;-->
+<!--    const sexValue = sexInput.value;-->
 
-    var xhr = new XMLHttpRequest();
-    var url =
-      "http://localhost/desc" +
-      "?tag_size=" +
-      encodeURIComponent(sizeValue) +
-      "&tag_color=" +
-      encodeURIComponent(colorValue);
+<!--    var xhr = new XMLHttpRequest();-->
+<!--    var url =-->
+<!--      "http://localhost/desc" +-->
+<!--      "?tag_size=" +-->
+<!--      encodeURIComponent(sizeValue) +-->
+<!--      "&tag_color=" +-->
+<!--      encodeURIComponent(colorValue);-->
 
-    //alert(url);
-    xhr.open("GET", url, true);
+<!--    //alert(url);-->
+<!--    xhr.open("POST", url, true);-->
 
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        var responseText = xhr.responseText;
-        var jsonResponse = JSON.parse(responseText);
-        var description = jsonResponse.Description;
-        document.getElementById("message").value = description;
-        //alert("Please wait a moment...");
-      }
-    };
+<!--    xhr.onreadystatechange = function () {-->
+<!--      if (xhr.readyState === 4 && xhr.status === 200) {-->
+<!--        var responseText = xhr.responseText;-->
+<!--        var jsonResponse = JSON.parse(responseText);-->
+<!--        var description = jsonResponse.Description;-->
+<!--        document.getElementById("message").value = description;-->
+<!--        //alert("Please wait a moment...");-->
+<!--      }-->
+<!--    };-->
 
-    xhr.send();
-  }
+<!--    xhr.send();-->
+<!--  }-->
 
-  var button = document.getElementById("myButton");
-  button.addEventListener("click", performAction);
-</script>
+<!--  var button = document.getElementById("myButton");-->
+<!--  button.addEventListener("click", performAction);-->
+<!--</script>-->
 
 </body>
 </html>

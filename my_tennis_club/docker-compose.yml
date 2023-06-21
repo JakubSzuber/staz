@@ -6,10 +6,10 @@ services:
       - .:/code
     ports:
       - "8000:8000"
-#    environment:
-#      - POSTGRES_NAME=postgres
-#      - POSTGRES_USER=masteruser
-#      - POSTGRES_PASSWORD=mypassword345.
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=masteruser
+      - POSTGRES_PASSWORD=mypassword345.
   db:
     image: postgres
     container_name: db
@@ -25,7 +25,7 @@ services:
 #     - LOCAL_HOME=/run/desktop/mnt/host/c/Users/jszub
     build: ../api_container
     volumes:
-      - ../api_container:/code
-      - ${LOCAL_HOME}/.aws:/root/.aws
+#      - ../api_container:/code
+      - ${LOCAL_HOME}/.aws:/home/python/.aws
     ports:
       - "80:80"
