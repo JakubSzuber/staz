@@ -140,3 +140,66 @@ def return_image():
     file_location = os.path.join(base_directory, "tmp/tmp.jpg")
     return FileResponse(file_location, media_type="image/jpeg")
 
+
+# -------------------------------------------- Playground --------------------------------------------
+
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel
+import jwt
+from jose import jwt, exceptions
+import datetime
+
+#app = FastAPI()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+SECRET_KEY = "my_secret_key"
+
+class User(BaseModel):
+    username: str
+    password: str
+
+api_username = env['API_USER']
+api_password = env['API_PASSWORD']
+
+users = [
+    User(username=api_username, password=api_password)
+]
+
+def authenticate_user(username: str, password: str):
+    user = next((user for user in users if user.username == username and user.password == password), None)
+    return user
+
+def create_access_token(data: dict):
+    expiration = datetime.timedelta(minutes=30)
+    to_encode = data.copy()
+    to_encode.update({"exp": datetime.datetime.utcnow() + expiration})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
+    return encoded_jwt
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        user = next((user for user in users if user.username == payload["sub"]), None)
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token invalid or expired")
+    except (jwt.ExpiredSignatureError, exceptions.JWTError):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token invalid or expired")
+    return user
+
+
+
+@app.post("/token")
+async def generate_token(username: str, password: str):
+    user = authenticate_user(username, password)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    access_token = create_access_token(data={"sub": user.username})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.get("/users/me")
+async def get_me(current_user: User = Depends(get_current_user)):
+    return "Auth Success!!!"
+
