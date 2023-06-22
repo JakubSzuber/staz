@@ -10,6 +10,11 @@ services:
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=masteruser
       - POSTGRES_PASSWORD=mypassword345.
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8000 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
   db:
     image: postgres
     container_name: db
@@ -24,8 +29,20 @@ services:
 #    environment:
 #     - LOCAL_HOME=/run/desktop/mnt/host/c/Users/jszub
     build: ../api_container
+    deploy:
+      resources:
+        limits:
+          cpus: '1.50'
+          memory: 400M
+        reservations:
+          cpus: '0.50'
+          memory: 128M
     volumes:
 #      - ../api_container:/code
       - ${LOCAL_HOME}/.aws:/home/python/.aws
     ports:
       - "80:80"
+    restart: always
+    depends_on:
+      web:
+        condition: service_healthy

@@ -13,6 +13,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 import requests
+from dotenv import dotenv_values
 
 
 def main(request):
@@ -86,11 +87,21 @@ def create_it_record(request):
             image = request.FILES.get('image')
             if image:
                 print('JEST IMAGE')
-                url = f"http://my_tennis_club-api-1/desc?tag_color={form.cleaned_data['color']}&tag_size={form.cleaned_data['size']}"
+
+                env = dotenv_values()
+                #api_key = env['API_KEY']
+                # api_username = env['API_USER']
+                # api_password = env['API_PASSWORD']
+                # url_token_gen_api = f"http://my_tennis_club-api-1/token?username={api_username}&password={api_password}"
+                # gen_api_response = requests.post(url_token_gen_api)
+                # raw_token = gen_api_response.json()
+                # clean_token = raw_token.get('access_token')
+
+                url_main = f"http://my_tennis_club-api-1/desc?tag_color={form.cleaned_data['color']}&tag_size={form.cleaned_data['size']}"
                 data1 = {'tag_color': form.cleaned_data['color'], 'tag_size': form.cleaned_data['size']}
                 files = {'image': image}
-                print('argumenty do posta', url, data1, files)
-                response = requests.post(url, files=files)
+                print('argumenty do posta', url_main, data1, files)
+                response = requests.post(url_main, headers={"access_token": "123"}, files=files)
                 if response.status_code == 200:
                     # Process the FastAPI response or handle any errors
                     response_data = response.json()
