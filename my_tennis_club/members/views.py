@@ -88,8 +88,8 @@ def create_it_record(request):
             if image:
                 print('JEST IMAGE')
 
-                env = dotenv_values()
-                #api_key = env['API_KEY']
+                #env = dotenv_values()
+                api_key = "9d207bf0-10f5-4d8f-a479-22ff5aeff8d1"
                 # api_username = env['API_USER']
                 # api_password = env['API_PASSWORD']
                 # url_token_gen_api = f"http://my_tennis_club-api-1/token?username={api_username}&password={api_password}"
@@ -101,7 +101,7 @@ def create_it_record(request):
                 data1 = {'tag_color': form.cleaned_data['color'], 'tag_size': form.cleaned_data['size']}
                 files = {'image': image}
                 print('argumenty do posta', url_main, data1, files)
-                response = requests.post(url_main, headers={"access_token": "123"}, files=files)
+                response = requests.post(url_main, headers={"access_token": api_key}, files=files)
                 if response.status_code == 200:
                     # Process the FastAPI response or handle any errors
                     response_data = response.json()

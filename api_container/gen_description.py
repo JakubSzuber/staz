@@ -16,16 +16,24 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.security.api_key import APIKeyQuery, APIKeyCookie, APIKeyHeader, APIKey
+from fastapi import HTTPException, status, Security, FastAPI ## TODO
+from fastapi.security import APIKeyHeader, APIKeyQuery ## TODO
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from pydantic import BaseModel
 from starlette.status import HTTP_403_FORBIDDEN
 from starlette.responses import RedirectResponse, JSONResponse
 
+
 # Load the environment variables from the .env file
 env = dotenv_values()
 
-API_KEY = env['API_KEY']
+API_KEYS = [
+    "9d207bf0-10f5-4d8f-a479-22ff5aeff8d1",
+    "f47d4a2c-24cf-4745-937e-620a5963c0b8",
+    "b7061546-75e8-444b-a2c4-f19655d07eb8",
+]
+
 API_KEY_NAME = "access_token"
 COOKIE_DOMAIN = "localtest.me"
 
@@ -54,42 +62,62 @@ headers = {
   "Authorization": f"Bearer {openai.api_key}"
 }
 
+def convert_to_jpg(input_path):
+    image_format = input_path.split('.')[-1]
+    image = Image.open(input_path)
+
+    print(image.mode)
+    if image.mode in ('RGBA', 'P'):
+        image = image.convert('RGB')
+    print(image.mode)
+
+    new_path = f'{input_path}'
+
+    if image_format in ['png', 'svg', 'webp']:
+        new_path = input_path.replace(image_format, "jpg")
+
+    image.save(new_path, 'JPEG')
+
 def image_caption_generator(image_path, tag_color, tag_size):
-  # create a tmp folder in order to save the resized input image
-  if not os.path.exists('tmp'):
-    os.makedirs('tmp')
+#    convert_to_jpg(image_path)
 
-  # Open the original image
-  img = Image.open(image_path)
+    print(image_path)
 
-  # Set the desired size for the resized image
-  new_size = (100, 100)
+    # create a tmp folder in order to save the resized input image
+    if not os.path.exists('tmp'):
+        os.makedirs('tmp')
 
-  # Resize the image
-  resized_img = img.resize(new_size)
+    # Open the original image
+    img = Image.open(image_path)
 
-  # Save the resized image
-  resized_img.save('tmp/tmp.jpg')
+    # Set the desired size for the resized image
+    new_size = (100, 100)
 
-  with open('tmp/tmp.jpg', 'rb') as image:
-    response = client.detect_labels(Image={'Bytes': image.read()})
+    # Resize the image
+    resized_img = img.resize(new_size)
 
-  image_labels = [tag_color, tag_size]
+    # Save the resized image
+    resized_img.save('tmp/tmp.jpg')
 
-  print('Image tags:')
-  for label in response['Labels']:
-    if label['Confidence'] > 97:
-      image_labels.append(label['Name'].lower())
-      print(f"{label['Name']} with confidance {label['Confidence']}")
+    with open('tmp/tmp.jpg', 'rb') as image:
+        response = client.detect_labels(Image={'Bytes': image.read()})
 
-  payload['messages'].append({"role": "user", "content": f'Create rich description of a cloth that is specified by its properties: {str(image_labels)}. You description should be very general but very long. It should be more like a description of the thing that this garment is than a description of that particular garment. Furthermore you shouldn\'t quote given tags! Type in polish language! This is example description for cloth that is based on properties: Clothing, Jeans, Pants, Smoke Pipe: Spodnie dżinsowe - to jedna z najbardziej uniwersalnych i popularnych części garderoby, które z pewnością przypadną do gustu każdemu, kto ceni sobie komfort, styl i trwałość. Jeżeli jesteś miłośnikiem wygody i modnych rozwiązań, spodnie dżinsowe z pewnością będą idealnym wyborem dla Ciebie. \nNie tylko są praktyczne, ale również niezwykle stylowe. Dżinsowe spodnie to nieodzowny element codziennego ubioru, który doskonale wpisuje się w niemal każdą okazję. Bez względu na to, czy wybierasz się na spotkanie ze znajomymi, do pracy, czy po prostu na relaksujący spacer, spodnie dżinsowe będą idealnym towarzyszem Twojego stylu.\nNasze spodnie dżinsowe charakteryzują się wysoką jakością wykonania oraz trwałością materiału. Dzięki temu, będziesz mógł cieszyć się nimi przez wiele sezonów, niezależnie od zmieniających się trendów mody. Warto zainwestować w produkt, który nie tylko wygląda świetnie, ale również zachowuje swoje właściwości nawet po wielu praniach.\nJeżeli jesteś miłośnikiem klasycznego stylu, spodnie dżinsowe będą dla Ciebie idealnym wyborem. Ich uniwersalność pozwoli Ci stworzyć wiele różnorodnych zestawień, dopasowując je do różnych stylizacji i okazji. Możesz połączyć je z elegancką koszulą i marynarką, aby stworzyć elegancki look, lub z luźnym t-shirtem i trampekami, aby uzyskać bardziej casualowy, ale nadal stylowy wygląd.\nTo pozwoli Ci wybrać model, który najlepiej podkreśli Twoją sylwetkę i pasuje do Twojego indywidualnego stylu.\nNie zapomnij również o dodatkach, które mogą podkreślić Twoją osobowość i dodać charakteru Twoim spodniom dżinsowym. To niewielkie elementy, które sprawią, że Twoje spodnie dżinsowe staną się niepowtarzalne.\nDżinsowe spodnie to nie tylko modny wybór, ale również wyraz osobistego stylu i swobody. W naszej kolekcji znajdziesz różnorodność wzorów, kolorów i detali, które pozwolą Ci w pełni wyrazić siebie poprzez swój ubiór. Nie wahaj się, pozwól swojej kreatywności rozbłysnąć i stwórz unikalne zestawienia z naszymi dżinsowymi spodniami.\nOdkryj świat spodni dżinsowych i dołącz do grona osób, które doceniają wygodę, styl i trwałość w jednym produkcie. Nasza kolekcja spodni dżinsowych czeka na Ciebie - wybierz te, które pasują do Ciebie najlepiej i ciesz się niezrównanym komfortem oraz wyjątkowym wyglądem, który przyciągnie spojrzenia innych.\n'})
-  response = requests.post(URL, headers=headers, json=payload, stream=False)
-  response_json = response.json()
-  message_content = response_json['choices'][0]['message']['content']
+    image_labels = [tag_color, tag_size]
 
-  output = '\nGenerated Image Description:\n' + message_content
+    print('Image tags:')
+    for label in response['Labels']:
+        if label['Confidence'] > 97:
+          image_labels.append(label['Name'].lower())
+          print(f"{label['Name']} with confidance {label['Confidence']}")
 
-  return output
+    payload['messages'].append({"role": "user", "content": f'Create rich description of a cloth that is specified by its properties: {str(image_labels)}. You description should be very general but very long. It should be more like a description of the thing that this garment is than a description of that particular garment. Furthermore you shouldn\'t quote given tags! Type in polish language! This is example description for cloth that is based on properties: Clothing, Jeans, Pants, Smoke Pipe: Spodnie dżinsowe - to jedna z najbardziej uniwersalnych i popularnych części garderoby, które z pewnością przypadną do gustu każdemu, kto ceni sobie komfort, styl i trwałość. Jeżeli jesteś miłośnikiem wygody i modnych rozwiązań, spodnie dżinsowe z pewnością będą idealnym wyborem dla Ciebie. \nNie tylko są praktyczne, ale również niezwykle stylowe. Dżinsowe spodnie to nieodzowny element codziennego ubioru, który doskonale wpisuje się w niemal każdą okazję. Bez względu na to, czy wybierasz się na spotkanie ze znajomymi, do pracy, czy po prostu na relaksujący spacer, spodnie dżinsowe będą idealnym towarzyszem Twojego stylu.\nNasze spodnie dżinsowe charakteryzują się wysoką jakością wykonania oraz trwałością materiału. Dzięki temu, będziesz mógł cieszyć się nimi przez wiele sezonów, niezależnie od zmieniających się trendów mody. Warto zainwestować w produkt, który nie tylko wygląda świetnie, ale również zachowuje swoje właściwości nawet po wielu praniach.\nJeżeli jesteś miłośnikiem klasycznego stylu, spodnie dżinsowe będą dla Ciebie idealnym wyborem. Ich uniwersalność pozwoli Ci stworzyć wiele różnorodnych zestawień, dopasowując je do różnych stylizacji i okazji. Możesz połączyć je z elegancką koszulą i marynarką, aby stworzyć elegancki look, lub z luźnym t-shirtem i trampekami, aby uzyskać bardziej casualowy, ale nadal stylowy wygląd.\nTo pozwoli Ci wybrać model, który najlepiej podkreśli Twoją sylwetkę i pasuje do Twojego indywidualnego stylu.\nNie zapomnij również o dodatkach, które mogą podkreślić Twoją osobowość i dodać charakteru Twoim spodniom dżinsowym. To niewielkie elementy, które sprawią, że Twoje spodnie dżinsowe staną się niepowtarzalne.\nDżinsowe spodnie to nie tylko modny wybór, ale również wyraz osobistego stylu i swobody. W naszej kolekcji znajdziesz różnorodność wzorów, kolorów i detali, które pozwolą Ci w pełni wyrazić siebie poprzez swój ubiór. Nie wahaj się, pozwól swojej kreatywności rozbłysnąć i stwórz unikalne zestawienia z naszymi dżinsowymi spodniami.\nOdkryj świat spodni dżinsowych i dołącz do grona osób, które doceniają wygodę, styl i trwałość w jednym produkcie. Nasza kolekcja spodni dżinsowych czeka na Ciebie - wybierz te, które pasują do Ciebie najlepiej i ciesz się niezrównanym komfortem oraz wyjątkowym wyglądem, który przyciągnie spojrzenia innych.\n'})
+    response = requests.post(URL, headers=headers, json=payload, stream=False)
+    response_json = response.json()
+    message_content = response_json['choices'][0]['message']['content']
+
+    output = '\nGenerated Image Description:\n' + message_content
+
+    return output
 
 async def get_api_key(
     api_key_query: str = Security(api_key_query),
@@ -97,15 +125,15 @@ async def get_api_key(
     api_key_cookie: str = Security(api_key_cookie),
 ):
 
-    if api_key_query == API_KEY:
+    if api_key_query in API_KEYS:
         return api_key_query
-    elif api_key_header == API_KEY:
+    elif api_key_header in API_KEYS:
         return api_key_header
-    elif api_key_cookie == API_KEY:
+    elif api_key_cookie in API_KEYS:
         return api_key_cookie
     else:
         raise HTTPException(
-            status_code=HTTP_403_FORBIDDEN, detail="Could not validate credentials"
+            status_code=HTTP_403_FORBIDDEN, detail="API Key is not valid or expired!"
         )
 
 
@@ -176,16 +204,21 @@ def read_root(
     tag_color: str,
     tag_size: str,
     image: UploadFile,
-    api_key: APIKey = Depends(get_api_key)
+    api_key: str = Security(get_api_key)
 ):
     file_location = f"files/{image.filename}"
+
+    print(file_location)
+
     os.makedirs(os.path.dirname(file_location), exist_ok=True)
     with open(file_location, "wb+") as file_object:
         file_object.write(image.file.read())
+
+    convert_to_jpg(file_location)
     return {"Description": image_caption_generator(file_location, tag_color, tag_size)}
 
 
-@app.get("/test-return-image")  # Enpoint for tetsing purposes
+@app.get("/test-return-image")  # TODO not secured enpoint for tetsing purposes
 def return_image():
     base_directory = os.path.dirname(os.path.abspath(__file__))
     file_location = os.path.join(base_directory, "tmp/tmp.jpg")
