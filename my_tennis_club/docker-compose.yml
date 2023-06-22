@@ -24,10 +24,6 @@ services:
     ports:
       - "5432:5432"
   api:
-#    env_file:
-#      - ../api_container/.env
-#    environment:
-#     - LOCAL_HOME=/run/desktop/mnt/host/c/Users/jszub
     build: ../api_container
     deploy:
       resources:

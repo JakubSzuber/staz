@@ -3,34 +3,30 @@ from PIL import Image
 import os
 import openai
 import requests
-from typing import List
-import jwt
-from jose import jwt, exceptions
-import datetime
 from dotenv import dotenv_values
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Request, UploadFile, File, Form, Depends, HTTPException, status, Security
 from fastapi_healthcheck import HealthCheckFactory, healthCheckRoute
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 from fastapi.security.api_key import APIKeyQuery, APIKeyCookie, APIKeyHeader, APIKey
-from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.openapi.utils import get_openapi
-from pydantic import BaseModel
 from starlette.status import HTTP_403_FORBIDDEN
-from starlette.responses import RedirectResponse, JSONResponse
+
 
 # Load the environment variables from the .env file
 env = dotenv_values()
 
-API_KEY = env['API_KEY']
+API_KEYS = [
+    "9d207bf0-10f5-4d8f-a479-22ff5aeff8d1",
+    "f47d4a2c-24cf-4745-937e-620a5963c0b8",
+    "b7061546-75e8-444b-a2c4-f19655d07eb8",
+]
+
 API_KEY_NAME = "access_token"
 COOKIE_DOMAIN = "localtest.me"
 
 api_key_query = APIKeyQuery(name=API_KEY_NAME, auto_error=False)
-api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
+api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)  # Could be also "x-api-key"
 api_key_cookie = APIKeyCookie(name=API_KEY_NAME, auto_error=False)
 
 openai.api_key = env['OPENAI_API']
@@ -62,6 +58,11 @@ def image_caption_generator(image_path, tag_color, tag_size):
   # Open the original image
   img = Image.open(image_path)
 
+  if img.mode in ('RGBA', 'P'):
+      img = img.convert('RGB')
+
+  img.save(image_path, 'JPEG')
+
   # Set the desired size for the resized image
   new_size = (100, 100)
 
@@ -91,21 +92,22 @@ def image_caption_generator(image_path, tag_color, tag_size):
 
   return output
 
+
 async def get_api_key(
     api_key_query: str = Security(api_key_query),
     api_key_header: str = Security(api_key_header),
     api_key_cookie: str = Security(api_key_cookie),
 ):
 
-    if api_key_query == API_KEY:
+    if api_key_query in API_KEYS:
         return api_key_query
-    elif api_key_header == API_KEY:
+    elif api_key_header in API_KEYS:
         return api_key_header
-    elif api_key_cookie == API_KEY:
+    elif api_key_cookie in API_KEYS:
         return api_key_cookie
     else:
         raise HTTPException(
-            status_code=HTTP_403_FORBIDDEN, detail="Could not validate credentials"
+            status_code=HTTP_403_FORBIDDEN, detail="API key is not valid or expired!"
         )
 
 
@@ -122,61 +124,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-#SECRET_KEY = "my_secret_key"
 
-# class User(BaseModel):
-#     username: str
-#     password: str
-#
-# api_username = env['API_USER']
-# api_password = env['API_PASSWORD']
-#
-# users = [
-#     User(username=api_username, password=api_password)
-# ]
-#
-# def authenticate_user(username: str, password: str):
-#     user = next((user for user in users if user.username == username and user.password == password), None)
-#     return user
-#
-# def create_access_token(data: dict):
-#     expiration = datetime.timedelta(minutes=30)
-#     to_encode = data.copy()
-#     to_encode.update({"exp": datetime.datetime.utcnow() + expiration})
-#     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
-#     return encoded_jwt
-#
-# async def get_current_user(token: str = Depends(oauth2_scheme)):
-#     try:
-#         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-#         user = next((user for user in users if user.username == payload["sub"]), None)
-#         if user is None:
-#             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token invalid or expired")
-#     except (jwt.ExpiredSignatureError, exceptions.JWTError):
-#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token invalid or expired")
-#     return user
-
-
-# ------------------------------------ Endpoint ------------------------------------
-
-# @app.post("/token")
-# async def generate_token(username: str, password: str):
-#     user = authenticate_user(username, password)
-#     if user is None:
-#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-#     access_token = create_access_token(data={"sub": user.username})
-#     return {"access_token": access_token, "token_type": "bearer"}
-
-
+# ---------------------------------------------- Endpoint ----------------------------------------------
 @app.post("/desc")
 def read_root(
     tag_color: str,
     tag_size: str,
     image: UploadFile,
-    api_key: APIKey = Depends(get_api_key)
+    api_key: str = Security(get_api_key)
 ):
     file_location = f"files/{image.filename}"
     os.makedirs(os.path.dirname(file_location), exist_ok=True)
@@ -185,7 +142,7 @@ def read_root(
     return {"Description": image_caption_generator(file_location, tag_color, tag_size)}
 
 
-@app.get("/test-return-image")  # Enpoint for tetsing purposes
+@app.get("/test-return-image")  # Not secure enpoint for tetsing purposes
 def return_image():
     base_directory = os.path.dirname(os.path.abspath(__file__))
     file_location = os.path.join(base_directory, "tmp/tmp.jpg")
