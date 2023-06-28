@@ -8,3 +8,4 @@ pydantic>=1.10.9
 python-dotenv>=1.0.0
 fastapi-healthcheck>=0.2.12
 python-multipart>=0.0.6
+gql>=3.4.1
