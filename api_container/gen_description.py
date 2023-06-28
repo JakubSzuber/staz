@@ -127,6 +127,158 @@ app.add_middleware(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
+from gql import gql, Client
+from gql.transport.aiohttp import AIOHTTPTransport
+
+def gen_tags(sku_value):
+    graphql_token = env['GRAPHQL_TOKEN']
+
+    transport = AIOHTTPTransport(url="https://saleor.gammasoft.pl/graphql/", headers={'Authorization': graphql_token})
+
+    # Create a GraphQL client using the defined transport
+    client = Client(transport=transport, fetch_schema_from_transport=True)
+
+    # TODO Provide a GraphQL query (not final)
+    query = gql(
+        """
+        query ($sku: String) {
+          productVariant(sku: $sku) {
+            product {
+              media {
+                url
+              }
+              attributes {
+                attribute {
+                  name
+                }
+                values {
+                  name
+                }
+              }
+            }
+          }
+        }
+    """)
+    print(query)
+    variables = {
+        "sku": sku_value
+    }
+    result = client.execute(query, variable_values=variables)
+    #result = client.execute(query)
+    print(result)
+    return(result)
+
+
+# TODO below code to parse result:
+# import json
+#
+# OF COURSE IT'S ONLY EXAMPLE WITH JSON AS STRING
+# json_string = """
+# {
+#     "productVariant": {
+#         "product": {
+#             "media": [
+#                 {
+#                     "url": "https://example.com/products/photo_1132466587739927487_0bbfa6be.jpg"
+#                 },
+#                 {
+#                     "url": "https://example.com/products/photo_170064535416482196_f1f96473.jpg"
+#                 }
+#             ],
+#             "attributes": [
+#                 {
+#                     "attribute": {
+#                         "name": "Marka odzież męska"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "inna"
+#                         }
+#                     ]
+#                 },
+#                 {
+#                     "attribute": {
+#                         "name": "Kolor"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "granatowy"
+#                         }
+#                     ]
+#                 },
+#                 {
+#                     "attribute": {
+#                         "name": "Rozmiar"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "XL"
+#                         }
+#                     ]
+#                 },
+#                 {
+#                     "attribute": {
+#                         "name": "Materiał"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "bawełna"
+#                         }
+#                     ]
+#                 },
+#                 {
+#                     "attribute": {
+#                         "name": "Stan"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "Używany z defektem"
+#                         }
+#                     ]
+#                 },
+#                 {
+#                     "attribute": {
+#                         "name": "Jakość"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "Shop Mix"
+#                         }
+#                     ]
+#                 },
+#                 {
+#                     "attribute": {
+#                         "name": "Wady"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "zmechacenie"
+#                         }
+#                     ]
+#                 }
+#             ]
+#         }
+#     }
+# }
+# """
+#
+# data = json.loads(json_string)
+#
+# image1 = data['productVariant']['product']['media'][0]['url']
+# image2 = data['productVariant']['product']['media'][1]['url']
+# brand = data['productVariant']['product']['attributes'][0]['values'][0]['name']
+# color = data['productVariant']['product']['attributes'][1]['values'][0]['name']
+# size = data['productVariant']['product']['attributes'][2]['values'][0]['name']
+# fabric = data['productVariant']['product']['attributes'][3]['values'][0]['name']
+# condition = data['productVariant']['product']['attributes'][4]['values'][0]['name']
+# quality = data['productVariant']['product']['attributes'][5]['values'][0]['name']
+# defects = data['productVariant']['product']['attributes'][6]['values'][0]['name']
+#
+#
+# print(image1, image2, brand, color, size, fabric, condition, quality, defects)
+
+
+
 # ---------------------------------------------- Endpoint ----------------------------------------------
 @app.post("/desc")
 def read_root(
@@ -141,6 +293,10 @@ def read_root(
         file_object.write(image.file.read())
     return {"Description": image_caption_generator(file_location, tag_color, tag_size)}
 
+@app.get("/sku-tags")
+def return_tags(sku_number: str, api_key: str = Security(get_api_key)):
+    tags_json = gen_tags(sku_number)
+    return tags_json
 
 @app.get("/test-return-image")  # Not secure enpoint for tetsing purposes
 def return_image():
