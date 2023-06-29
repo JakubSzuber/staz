@@ -114,3 +114,6 @@ def create_it_record(request):
     else:
         form = RecordITForm()
     return render(request, 'createIt.html', {'form': form})
+
+def sku_num_inp(request):
+    return 1
