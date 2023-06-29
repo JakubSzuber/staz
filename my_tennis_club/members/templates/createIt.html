@@ -122,23 +122,6 @@
     <button type="submit">Create Record</button>
 </form>
     </div>
-<script>
-  document.getElementById("myForm").addEventListener("submit", function(event) {
-    event.preventDefault(); // Prevent the default form submission
-
-    const form = event.target;
-    sku = document.getElementById("skui")
-    // Perform the AJAX request
-    const xhr = new XMLHttpRequest();
-    xhr.open(form.method, form.action, true);
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4) {
-        alert(sku.value);
-      }
-    };
-    xhr.send(new FormData(form));
-  });
-</script>
 
 <form method="post" enctype="multipart/form-data" action="{% url 'create_it_record' %}">
     {% csrf_token %}

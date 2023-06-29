@@ -9,6 +9,6 @@ urlpatterns = [
     path('items/', views.ItemL, name='items'),
     path('items/detailed/<int:id>', views.ItemDet, name='itemdetail'),
     path('items/create-item/', views.create_it_record, name='create_it_record'),
-    path('items/sku_num/', views.sku_num_inp, name='sku_num_inp'),
+    path('items/sku_num/', views.create_it_record, name='sku_num_inp'),
     path('testing/', views.testing, name='testing'),
 ]

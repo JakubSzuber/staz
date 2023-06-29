@@ -111,9 +111,10 @@ def create_it_record(request):
                     return render(request, 'error.html')
             else:
                 print("NIE MA IMAGE")
+    elif request.method == 'GET':
+        form = RecordITForm(request.GET)
+        print('form jest valid.....')
     else:
         form = RecordITForm()
     return render(request, 'createIt.html', {'form': form})
 
-def sku_num_inp(request):
-    return 1
