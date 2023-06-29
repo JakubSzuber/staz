@@ -87,13 +87,11 @@
     }
 
     input, textarea, select {
-        position: relative;
         margin-top: 7px;
-        width: 50%;
     }
 
     textarea {
-        width: 50%;
+        width: 100%;
         height: 250px;
     }
 
@@ -101,6 +99,11 @@
         position: relative;
         background-color: gray;
     }
+#form-container {
+    float: right;
+    margin-right: 20px;
+    margin-top: 20px;
+}
   </style>
     </head>
 <body>
@@ -112,6 +115,14 @@
 </div>
 
 {% block content %}
+<div id="2forms">
+    <div id="form-container">
+<form id="myForm" method="get" enctype="multipart/form-data" action="{% url 'sku_num_inp' %}">
+    <input placeholder="sku number" id="skui">
+    <button type="submit">Create Record</button>
+</form>
+    </div>
+
 <form method="post" enctype="multipart/form-data" action="{% url 'create_it_record' %}">
     {% csrf_token %}
     {{ form.typ.label_tag }}
@@ -139,9 +150,7 @@
     <button type="submit">Create Record</button>
     <button type="button" id="myButton"> Add Description</button>
 </form>
-
-
-
+</div>
 {% endblock %}
 
 <!--<script>-->
