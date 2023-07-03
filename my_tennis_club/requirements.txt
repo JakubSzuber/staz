@@ -9,3 +9,4 @@ requests
 Pillow
 httpx
 aiohttp
+gql>=3.4.1

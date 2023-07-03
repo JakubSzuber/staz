@@ -9,6 +9,9 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 import requests
 from dotenv import dotenv_values
+from gql import gql, Client
+from gql.transport.aiohttp import AIOHTTPTransport
+import json
 
 
 def main(request):
@@ -112,12 +115,168 @@ def create_it_record(request):
             else:
                 print("NIE MA IMAGE")
     elif request.method == 'GET':
-        form = RecordITForm(request.GET)
-        print('form jest valid.....')
+        print('REQUEST Z GET ----------------------------------------------------------')
+        if 'add_tags' in request.GET:
+            sku_value = request.GET.get('sku')
+            # # Assuming value1, value2, and value3 are related to the sku
+            # value1 = "example value1 related to " + sku_value
+            # value2 = "example value2 related to " + sku_value
+            # value3 = "example value3 related to " + sku_value
+            # form = RecordITForm(initial={'typ': value1, 'mark': value2, 'size': value3})
+
+            #graphql_token = env['GRAPHQL_TOKEN']
+            #graphql_token = "Bearer xxx"
+
+            transport = AIOHTTPTransport(url="https://saleor.gammasoft.pl/graphql/")
+
+            # Create a GraphQL client using the defined transport
+            client = Client(transport=transport, fetch_schema_from_transport=True)
+
+            query = gql(
+                """
+                query ($sku: String) {
+                  productVariant(sku: $sku, channel:"fashion4you") {
+                    product {
+                      category {
+                        name
+                      }
+                      media {
+                        url
+                      }
+                      attributes {
+                        attribute {
+                          name
+                        }
+                        values {
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+            """)
+            print(query)
+            variables = {
+                "sku": sku_value
+            }
+            result = client.execute(query, variable_values=variables)
+            # result = client.execute(query)
+            print("Result nizej: -----------------------------")
+            print(result)
+            print('Typ resoult:', type(result))
+
+            data = result
+
+            category = data['productVariant']['product']['category']['name']
+            image1 = data['productVariant']['product']['media'][0]['url']
+            image2 = data['productVariant']['product']['media'][1]['url']
+            brand = data['productVariant']['product']['attributes'][0]['values'][0]['name']
+            color = data['productVariant']['product']['attributes'][1]['values'][0]['name']
+            size = data['productVariant']['product']['attributes'][2]['values'][0]['name']
+            fabric = data['productVariant']['product']['attributes'][3]['values'][0]['name']
+            condition = data['productVariant']['product']['attributes'][4]['values'][0]['name']
+            #quality = data['productVariant']['product']['attributes'][5]['values'][0]['name']
+            #defects = data['productVariant']['product']['attributes'][6]['values'][0]['name']
+
+            print('Assigned variables: -------------')
+            print(image1, image2, brand, color, size, fabric, condition, category)
+            #print(image1, image2, brand, color, size, fabric, condition, quality, defects)
+
+            form = RecordITForm(initial={'typ': 'value111', 'mark': brand, 'size': size, 'color': color, 'wear': "value333", 'sex': "value333"})
+        else:
+            form = RecordITForm(request.GET)
     else:
         form = RecordITForm()
     return render(request, 'createIt.html', {'form': form})
 
 
-
+# OF COURSE IT'S ONLY EXAMPLE WITH JSON AS STRING
+# json_string = """
+# {
+#     "productVariant": {
+#         "product": {
+#             "media": [
+#                 {
+#                     "url": "https://example.com/products/photo_1132466587739927487_0bbfa6be.jpg"
+#                 },
+#                 {
+#                     "url": "https://example.com/products/photo_170064535416482196_f1f96473.jpg"
+#                 }
+#             ],
+#             "attributes": [
+#                 {
+#                     "attribute": {
+#                         "name": "Marka odzież męska"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "inna"
+#                         }
+#                     ]
+#                 },
+#                 {
+#                     "attribute": {
+#                         "name": "Kolor"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "granatowy"
+#                         }
+#                     ]
+#                 },
+#                 {
+#                     "attribute": {
+#                         "name": "Rozmiar"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "XL"
+#                         }
+#                     ]
+#                 },
+#                 {
+#                     "attribute": {
+#                         "name": "Materiał"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "bawełna"
+#                         }
+#                     ]
+#                 },
+#                 {
+#                     "attribute": {
+#                         "name": "Stan"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "Używany z defektem"
+#                         }
+#                     ]
+#                 },
+#                 {
+#                     "attribute": {
+#                         "name": "Jakość"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "Shop Mix"
+#                         }
+#                     ]
+#                 },
+#                 {
+#                     "attribute": {
+#                         "name": "Wady"
+#                     },
+#                     "values": [
+#                         {
+#                             "name": "zmechacenie"
+#                         }
+#                     ]
+#                 }
+#             ]
+#         }
+#     }
+# }
+# """
 

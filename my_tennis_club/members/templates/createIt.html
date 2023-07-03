@@ -117,9 +117,9 @@
 {% block content %}
 <div id="2forms">
     <div id="form-container">
-<form id="myForm" method="get" enctype="multipart/form-data" action="{% url 'sku_num_inp' %}">
-    <input placeholder="sku number" id="skui">
-    <button type="submit">Create Record</button>
+<form id="myForm" method="get" enctype="multipart/form-data" action="{% url 'create_it_record' %}">
+    <input placeholder="sku number" id="sku" name="sku">
+    <button type="submit" name="add_tags">Add tags</button>
 </form>
     </div>
 

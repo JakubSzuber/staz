@@ -133,7 +133,7 @@ from gql.transport.aiohttp import AIOHTTPTransport
 def gen_tags(sku_value):
     graphql_token = env['GRAPHQL_TOKEN']
 
-    transport = AIOHTTPTransport(url="https://saleor.gammasoft.pl/graphql/", headers={'Authorization': graphql_token})
+    transport = AIOHTTPTransport(url="https://saleor.gammasoft.pl/graphql/")
 
     # Create a GraphQL client using the defined transport
     client = Client(transport=transport, fetch_schema_from_transport=True)
@@ -142,7 +142,7 @@ def gen_tags(sku_value):
     query = gql(
         """
         query ($sku: String) {
-          productVariant(sku: $sku) {
+          productVariant(sku: $sku, channel:"fashion4you") {
             product {
               media {
                 url
