@@ -118,3 +118,6 @@ def create_it_record(request):
         form = RecordITForm()
     return render(request, 'createIt.html', {'form': form})
 
+
+
+
