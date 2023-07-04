@@ -7,14 +7,9 @@ class Member(models.Model):
   joined_date = models.DateField(null=True)
 
 class Item(models.Model):
-  typ = models.CharField(max_length=128)
-  mark = models.CharField(max_length=128)
-  size = models.CharField(max_length=8)
-  color = models.CharField(max_length=128)
-  wear = models.CharField(max_length=128)
-  SEX_CHOICES = [
-    ('Men', 'Men'),
-    ('Woman', 'Woman'),
-  ]
-  sex = models.CharField(max_length=128, choices=SEX_CHOICES, default='Unknown')
-  image = models.ImageField(upload_to='item_images/', null=True)
+  Category = models.CharField(max_length=128, default='')
+  Mark = models.CharField(max_length=128, default='')
+  Color = models.CharField(max_length=128, default='')
+  Size = models.CharField(max_length=128, default='')
+  Fabric = models.CharField(max_length=128, default='')
+  Wear = models.CharField(max_length=128, default='')
