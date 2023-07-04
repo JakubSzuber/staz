@@ -125,7 +125,6 @@ def create_it_record(request):
             # form = RecordITForm(initial={'typ': value1, 'mark': value2, 'size': value3})
 
             #graphql_token = env['GRAPHQL_TOKEN']
-            #graphql_token = "Bearer xxx"
 
             transport = AIOHTTPTransport(url="https://saleor.gammasoft.pl/graphql/")
 
@@ -279,4 +278,3 @@ def create_it_record(request):
 #     }
 # }
 # """
-
