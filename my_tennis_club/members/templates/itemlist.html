@@ -9,7 +9,7 @@
     <h1>Item list</h1>
     <ul>
       {% for x in myItems %}
-        <li onclick="window.location = 'detailed/{{ x.id }}'">{{ x.typ }} {{ x.mark }}</li>
+        <li onclick="window.location = 'detailed/{{ x.id }}'">{{ x.Category }} {{ x.Mark }}</li>
       {% endfor %}
     </ul>
   </div>

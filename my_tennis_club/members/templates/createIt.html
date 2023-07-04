@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
     {% load static %}
   <link rel="stylesheet" href="{% static 'myglobal.css' %}">
@@ -118,32 +118,36 @@
 <div id="2forms">
     <div id="form-container">
 <form id="myForm" method="get" enctype="multipart/form-data" action="{% url 'create_it_record' %}">
-    <input placeholder="sku number" id="sku" name="sku">
-    <button type="submit" name="add_tags">Add tags</button>
+    <input placeholder="sku number" id="skui">
+    <button type="submit">Create Record</button>
 </form>
     </div>
 
 <form method="post" enctype="multipart/form-data" action="{% url 'create_it_record' %}">
     {% csrf_token %}
-    {{ form.typ.label_tag }}
-    {{ form.typ }}
+    {{ form.Category.label_tag }}
+    {{ form.Category }}
     <br>
-    {{ form.mark.label_tag }}
-    {{ form.mark }}
+    {{ form.Mark.label_tag }}
+    {{ form.Mark }}
     <br>
-    {{ form.size.label_tag }}
-    {{ form.size }}
+    {{ form.Color.label_tag }}
+    {{ form.Color }}
     <br>
-    {{ form.color.label_tag }}
-    {{ form.color }}
+    {{ form.Size.label_tag }}
+    {{ form.Size }}
     <br>
-    {{ form.wear.label_tag }}
-    {{ form.wear }}
+    {{ form.Fabric.label_tag }}
+    {{ form.Fabric }}
     <br>
-    {{ form.sex.label_tag }}
-    {{ form.sex }}
+    {{ form.Wear.label_tag }}
+    {{ form.Wear }}
     <br>
-    <input type="file" name="image">
+  <label for="image1">Image 1:</label>
+  <input type="file" name="image_1" id="image1">
+  <br>
+  <label for="image2">Image 2:</label>
+  <input type="file" name="image_2" id="image2">
     <br>
     <label for="message">Message:</label><br>
     <textarea id="message" name="message" rows="4" cols="50" required>{{ description }}</textarea><br>
@@ -152,52 +156,5 @@
 </form>
 </div>
 {% endblock %}
-
-<!--<script>-->
-<!--  function performAction() {-->
-<!--    alert("Button clicked! Performing action, please wait a moment...");-->
-
-<!--    const typInput = document.querySelector('#id_typ');-->
-<!--    const markInput = document.querySelector('#id_mark');-->
-<!--    const sizeInput = document.querySelector('#id_size');-->
-<!--    const colorInput = document.querySelector('#id_color');-->
-<!--    const wearInput = document.querySelector('#id_wear');-->
-<!--    const sexInput = document.querySelector('#id_sex');-->
-
-<!--    const typValue = typInput.value;-->
-<!--    const markValue = markInput.value;-->
-<!--    const sizeValue = sizeInput.value;-->
-<!--    const colorValue = colorInput.value;-->
-<!--    const wearValue = wearInput.value;-->
-<!--    const sexValue = sexInput.value;-->
-
-<!--    var xhr = new XMLHttpRequest();-->
-<!--    var url =-->
-<!--      "http://localhost/desc" +-->
-<!--      "?tag_size=" +-->
-<!--      encodeURIComponent(sizeValue) +-->
-<!--      "&tag_color=" +-->
-<!--      encodeURIComponent(colorValue);-->
-
-<!--    //alert(url);-->
-<!--    xhr.open("POST", url, true);-->
-
-<!--    xhr.onreadystatechange = function () {-->
-<!--      if (xhr.readyState === 4 && xhr.status === 200) {-->
-<!--        var responseText = xhr.responseText;-->
-<!--        var jsonResponse = JSON.parse(responseText);-->
-<!--        var description = jsonResponse.Description;-->
-<!--        document.getElementById("message").value = description;-->
-<!--        //alert("Please wait a moment...");-->
-<!--      }-->
-<!--    };-->
-
-<!--    xhr.send();-->
-<!--  }-->
-
-<!--  var button = document.getElementById("myButton");-->
-<!--  button.addEventListener("click", performAction);-->
-<!--</script>-->
-
 </body>
 </html>
