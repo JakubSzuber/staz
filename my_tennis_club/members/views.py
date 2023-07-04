@@ -92,14 +92,15 @@ def create_it_record(request):
         if form.is_valid():
             print('if numer 2')
             form.save()
-            image = request.FILES.get('image')
+            image = request.FILES.get('image_1')
             if image:
                 print('if numer 3')
                 print('JEST IMAGE')
 
-                url_main = f"http://my_tennis_club-api-1/desc?tag_color={form.cleaned_data['color']}&tag_size={form.cleaned_data['size']}"
-                data1 = {'tag_color': form.cleaned_data['color'], 'tag_size': form.cleaned_data['size']}
-                files = {'image': image}
+                url_main = f"http://my_tennis_club-api-1/desc?tag_category={form.cleaned_data['Category']}&tag_mark={form.cleaned_data['Mark']}&tag_color={form.cleaned_data['Color']}&tag_size={form.cleaned_data['Size']}&tag_fabric={form.cleaned_data['Fabric']}&tag_wear={form.cleaned_data['Wear']}"
+                data1 = {'tag_category': form.cleaned_data['Category'], 'tag_mark': form.cleaned_data['Mark'], 'tag_color': form.cleaned_data['Color'], 'tag_size': form.cleaned_data['Size'], 'tag_fabric': form.cleaned_data['Fabric'], 'tag_wear': form.cleaned_data['Wear']}
+                files = {'image1': image}
+
                 print('argumenty do posta', url_main, data1, files)
                 response = requests.post(url_main, headers={"access_token": "9d207bf0-10f5-4d8f-a479-22ff5aeff8d1"}, files=files)
                 if response.status_code == 200:
@@ -119,10 +120,11 @@ def create_it_record(request):
         else:
             print('Form is not valid:', form.errors)
     elif request.method == 'GET':
-        form = RecordITForm(request.GET)
+        #form = RecordITForm(request.GET)
         print('elif')
         print('REQUEST Z GET ----------------------------------------------------------')
         if 'add_tags' in request.GET:
+            print('Wchodzi do ifa--------------')
             sku_value = request.GET.get('sku')
             # # Assuming value1, value2, and value3 are related to the sku
             # value1 = "example value1 related to " + sku_value
@@ -187,8 +189,9 @@ def create_it_record(request):
             print(image1, image2, brand, color, size, fabric, condition, category)
             #print(image1, image2, brand, color, size, fabric, condition, quality, defects)
 
-            form = RecordITForm(initial={'typ': 'value111', 'mark': brand, 'size': size, 'color': color, 'wear': "value333", 'sex': "value333"})
+            form = RecordITForm(initial={'Category': category, 'Mark': brand, 'Color':color, 'Size': size, 'Fabric': fabric, 'Wear': condition})
         else:
+            print('NIe wchodzi do ifa--------------')
             form = RecordITForm(request.GET)
     else:
         form = RecordITForm()

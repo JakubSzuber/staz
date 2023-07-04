@@ -50,7 +50,7 @@ headers = {
   "Authorization": f"Bearer {openai.api_key}"
 }
 
-def image_caption_generator(image_path, tag_color, tag_size):
+def image_caption_generator(image_path, tag_category, tag_mark, tag_color, tag_size, tag_fabric, tag_wear):
   # create a tmp folder in order to save the resized input image
   if not os.path.exists('tmp'):
     os.makedirs('tmp')
@@ -75,7 +75,7 @@ def image_caption_generator(image_path, tag_color, tag_size):
   with open('tmp/tmp.jpg', 'rb') as image:
     response = client.detect_labels(Image={'Bytes': image.read()})
 
-  image_labels = [tag_color, tag_size]
+  image_labels = [tag_category, tag_mark, tag_color, tag_size, tag_fabric, tag_wear]
 
   print('Image tags:')
   for label in response['Labels']:
@@ -282,16 +282,20 @@ def gen_tags(sku_value):
 # ---------------------------------------------- Endpoint ----------------------------------------------
 @app.post("/desc")
 def read_root(
+    tag_category: str,
+    tag_mark: str,
     tag_color: str,
     tag_size: str,
-    image: UploadFile,
+    tag_fabric: str,
+    tag_wear: str,
+    image1: UploadFile,
     api_key: str = Security(get_api_key)
 ):
-    file_location = f"files/{image.filename}"
+    file_location = f"files/{image1.filename}"
     os.makedirs(os.path.dirname(file_location), exist_ok=True)
     with open(file_location, "wb+") as file_object:
-        file_object.write(image.file.read())
-    return {"Description": image_caption_generator(file_location, tag_color, tag_size)}
+        file_object.write(image1.file.read())
+    return {"Description": image_caption_generator(file_location, tag_category, tag_mark, tag_color, tag_size, tag_fabric, tag_wear)}
 
 @app.get("/sku-tags")
 def return_tags(sku_number: str, api_key: str = Security(get_api_key)):

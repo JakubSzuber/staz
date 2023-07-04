@@ -104,6 +104,19 @@
     margin-right: 20px;
     margin-top: 20px;
 }
+    #2forms {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .image-input {
+        display: flex;
+        align-items: center;
+        margin-right: 20px;
+    }
+    .image-input label {
+        margin-right : 20px;
+    }
   </style>
     </head>
 <body>
@@ -114,17 +127,17 @@
   <a href="/items">ITEMS</a>
 </div>
 
-{% block content %}
-<div id="2forms">
+  {% block content %}
+  <div id="2forms">
     <div id="form-container">
-<form id="myForm" method="get" enctype="multipart/form-data" action="{% url 'create_it_record' %}">
-    <input placeholder="sku number" id="skui">
-    <button type="submit">Create Record</button>
-</form>
+    <form id="myForm" method="get" enctype="multipart/form-data" action="{% url 'create_it_record' %}">
+        <input placeholder="sku number" id="sku" name="sku">
+        <button type="submit" name="add_tags">Add tags</button>
+    </form>
     </div>
 
-<form method="post" enctype="multipart/form-data" action="{% url 'create_it_record' %}">
-    {% csrf_token %}
+    <form method="post" enctype="multipart/form-data" action="{% url 'create_it_record' %}">
+{% csrf_token %}
     {{ form.Category.label_tag }}
     {{ form.Category }}
     <br>
@@ -143,18 +156,50 @@
     {{ form.Wear.label_tag }}
     {{ form.Wear }}
     <br>
-  <label for="image1">Image 1:</label>
-  <input type="file" name="image_1" id="image1">
-  <br>
-  <label for="image2">Image 2:</label>
-  <input type="file" name="image_2" id="image2">
-    <br>
-    <label for="message">Message:</label><br>
-    <textarea id="message" name="message" rows="4" cols="50" required>{{ description }}</textarea><br>
+    {% if not description %}
+      <div class="image-input">
+        <label for="image1">Image 1:</label>
+        <input type="file" name="image_1" id="image1">
+        <img id="img1" style="max-width: 200px; max-height: 200px;">
+      </div>
+
+      <div class="image-input">
+        <label for="image2">Image 2:</label>
+        <input type="file" name="image_2" id="image2">
+        <img id="img2" style="max-width: 200px; max-height: 200px;">
+      </div>
+    {% endif %}
+     <br>
+    {% if description %}
+        <label for="message">Message:</label><br>
+        <textarea id="message" name="message" rows="4" cols="50">{{ description }}</textarea><br>
+    {% endif %}
     <button type="submit">Create Record</button>
     <button type="button" id="myButton"> Add Description</button>
 </form>
 </div>
 {% endblock %}
+<script>
+  document.getElementById('image1').addEventListener('change', function() {
+    previewImage(this, 'img1');
+  });
+
+  document.getElementById('image2').addEventListener('change', function() {
+    previewImage(this, 'img2');
+  });
+
+  function previewImage(input, imgId) {
+    var file    = input.files[0];
+    var reader  = new FileReader();
+
+    reader.addEventListener("load", function () {
+      document.getElementById(imgId).src = reader.result;
+    }, false);
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  }
+  </script>
 </body>
 </html>
