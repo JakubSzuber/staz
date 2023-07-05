@@ -8,4 +8,4 @@ class RecordForm(forms.ModelForm):
 class RecordITForm(forms.ModelForm):
     class Meta:
         model = Item
-        fields = ['Category', 'Mark', 'Color', 'Size', 'Fabric', 'Wear']
+        fields = ['Category', 'Mark', 'Color', 'Size', 'Fabric', 'Wear', 'Image1', 'Image2']

@@ -13,3 +13,5 @@ class Item(models.Model):
   Size = models.CharField(max_length=128, default='')
   Fabric = models.CharField(max_length=128, default='')
   Wear = models.CharField(max_length=128, default='')
+  Image1 = models.ImageField(upload_to='images/', default='images/None/no-img.jpg')
+  Image2 = models.ImageField(upload_to='images/', default='images/None/no-img.jpg')

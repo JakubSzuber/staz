@@ -12,7 +12,14 @@ from dotenv import dotenv_values
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 import json
+import requests
+from django.core.files.base import ContentFile
 
+def download_image_from_url(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return ContentFile(response.content)
+    return None
 
 def main(request):
   template = loader.get_template('main.html')
@@ -84,14 +91,25 @@ def createIt(request):
   return HttpResponse(template.render())
 
 
+from django.shortcuts import render
+from .forms import RecordITForm
+import requests
+from django.core.files.base import ContentFile
+
+context = ''
+
 @csrf_exempt
 def create_it_record(request):
+    global context
     if request.method == 'POST':
-        form = RecordITForm(request.POST)
+        form = RecordITForm(request.POST, request.FILES)
+        #form = RecordITForm(request.POST)
         print('if numer 1')
         if form.is_valid():
             print('if numer 2')
             form.save()
+            #image = request.FILES.get('picture1')
+            #image = form.cleaned_data['picture1']
             image = request.FILES.get('image_1')
             if image:
                 print('if numer 3')
@@ -189,13 +207,20 @@ def create_it_record(request):
             print(image1, image2, brand, color, size, fabric, condition, category)
             #print(image1, image2, brand, color, size, fabric, condition, quality, defects)
 
-            form = RecordITForm(initial={'Category': category, 'Mark': brand, 'Color':color, 'Size': size, 'Fabric': fabric, 'Wear': condition})
+            image1_file = download_image_from_url(image1)
+            image2_file = download_image_from_url(image2)
+
+            form = RecordITForm(initial={'Category': category, 'Mark': brand, 'Color': color, 'Size': size, 'Fabric': fabric, 'Wear': condition})
+            context = {'form': form, 'image1': image1, 'image2': image2}
         else:
             print('NIe wchodzi do ifa--------------')
             form = RecordITForm(request.GET)
     else:
         form = RecordITForm()
-    return render(request, 'createIt.html', {'form': form})
+    if context:
+        return render(request, 'createIt.html', context)
+    else:
+        return render(request, 'createIt.html', {'form': form})
 
 
 # OF COURSE IT'S ONLY EXAMPLE WITH JSON AS STRING

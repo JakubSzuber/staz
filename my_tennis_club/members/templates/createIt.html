@@ -157,17 +157,17 @@
     {{ form.Wear }}
     <br>
     {% if not description %}
-      <div class="image-input">
-        <label for="image1">Image 1:</label>
-        <input type="file" name="image_1" id="image1">
-        <img id="img1" style="max-width: 200px; max-height: 200px;">
-      </div>
+        <div class="image-input">
+            <label for="image1">Image 1:</label>
+            <input type="file" name="image_1" id="image1">
+            <img id="img1" name="picture1" src="{{ image1 }}" style="max-width: 200px; max-height: 200px;">
+        </div>
 
-      <div class="image-input">
-        <label for="image2">Image 2:</label>
-        <input type="file" name="image_2" id="image2">
-        <img id="img2" style="max-width: 200px; max-height: 200px;">
-      </div>
+        <div class="image-input">
+            <label for="image2">Image 2:</label>
+            <input type="file" name="image_2" id="image2">
+            <img id="img2" src="{{ image2 }}" style="max-width: 200px; max-height: 200px;">
+        </div>
     {% endif %}
      <br>
     {% if description %}
