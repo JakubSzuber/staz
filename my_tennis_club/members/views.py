@@ -1,25 +1,24 @@
-from django.http import HttpResponse
-from django.template import loader
 from .models import Member, Item
-from django.shortcuts import render, redirect
 from .forms import RecordForm, RecordITForm
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
 import requests
 from dotenv import dotenv_values
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
-import json
-import requests
 from django.core.files.base import ContentFile
+from django.shortcuts import render, redirect
+from django.template import loader
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+
+
+env = dotenv_values()
 
 def download_image_from_url(url):
     response = requests.get(url)
     if response.status_code == 200:
         return ContentFile(response.content)
     return None
+
 
 def main(request):
   template = loader.get_template('main.html')
@@ -91,40 +90,35 @@ def createIt(request):
   return HttpResponse(template.render())
 
 
-from django.shortcuts import render
-from .forms import RecordITForm
-import requests
-from django.core.files.base import ContentFile
-
-context = ''
-
 @csrf_exempt
 def create_it_record(request):
-    global context
+    context = ''
+
     if request.method == 'POST':
         form = RecordITForm(request.POST, request.FILES)
-        #form = RecordITForm(request.POST)
-        print('if numer 1')
+        print('Method POST executed')
+
         if form.is_valid():
-            print('if numer 2')
+            print('Form is valid')
             form.save()
-            #image = request.FILES.get('picture1')
-            #image = form.cleaned_data['picture1']
             image = request.FILES.get('image_1')
+
             if image:
-                print('if numer 3')
-                print('JEST IMAGE')
+                print('Image is present')
 
                 url_main = f"http://my_tennis_club-api-1/desc?tag_category={form.cleaned_data['Category']}&tag_mark={form.cleaned_data['Mark']}&tag_color={form.cleaned_data['Color']}&tag_size={form.cleaned_data['Size']}&tag_fabric={form.cleaned_data['Fabric']}&tag_wear={form.cleaned_data['Wear']}"
                 data1 = {'tag_category': form.cleaned_data['Category'], 'tag_mark': form.cleaned_data['Mark'], 'tag_color': form.cleaned_data['Color'], 'tag_size': form.cleaned_data['Size'], 'tag_fabric': form.cleaned_data['Fabric'], 'tag_wear': form.cleaned_data['Wear']}
                 files = {'image1': image}
 
-                print('argumenty do posta', url_main, data1, files)
-                response = requests.post(url_main, headers={"access_token": "9d207bf0-10f5-4d8f-a479-22ff5aeff8d1"}, files=files)
+                print('Parameters for FastAPI request:', url_main, data1, files)
+
+                response = requests.post(url_main, headers={"access_token": env['FASTAPI_KEY']}, files=files)
+
                 if response.status_code == 200:
-                    print('if numer 4')
+                    print('Response from FastAPI returned successfully')
                     response_data = response.json()
                     description = response_data.get('Description')
+                    print(f'Generated description: {description}')
                     context = {
                         'description': description,
                     }
@@ -134,29 +128,20 @@ def create_it_record(request):
                     print('Error:', response.status_code, response.text)
                     return render(request, 'error.html')
             else:
-                print("NIE MA IMAGE")
+                print("Image is not present!")
         else:
             print('Form is not valid:', form.errors)
-    elif request.method == 'GET':
-        #form = RecordITForm(request.GET)
-        print('elif')
-        print('REQUEST Z GET ----------------------------------------------------------')
-        if 'add_tags' in request.GET:
-            print('Wchodzi do ifa--------------')
-            sku_value = request.GET.get('sku')
-            # # Assuming value1, value2, and value3 are related to the sku
-            # value1 = "example value1 related to " + sku_value
-            # value2 = "example value2 related to " + sku_value
-            # value3 = "example value3 related to " + sku_value
-            # form = RecordITForm(initial={'typ': value1, 'mark': value2, 'size': value3})
 
-            #graphql_token = env['GRAPHQL_TOKEN']
+    elif request.method == 'GET':
+        print('Method GET executed')
+
+        if 'add_tags' in request.GET:
+            print('Button that adds tags was clicked')
+
+            sku_value = request.GET.get('sku')
 
             transport = AIOHTTPTransport(url="https://saleor.gammasoft.pl/graphql/")
-
-            # Create a GraphQL client using the defined transport
             client = Client(transport=transport, fetch_schema_from_transport=True)
-
             query = gql(
                 """
                 query ($sku: String) {
@@ -180,40 +165,31 @@ def create_it_record(request):
                   }
                 }
             """)
-            print(query)
+            print(f'GraphQL Query: {query}')
             variables = {
                 "sku": sku_value
             }
             result = client.execute(query, variable_values=variables)
-            # result = client.execute(query)
-            print("Result nizej: -----------------------------")
-            print(result)
-            print('Typ resoult:', type(result))
 
-            data = result
+            print(f"Result of GraphQL Query: {result}")
+            print('Type of the result:', type(result))
 
-            category = data['productVariant']['product']['category']['name']
-            image1 = data['productVariant']['product']['media'][0]['url']
-            image2 = data['productVariant']['product']['media'][1]['url']
-            brand = data['productVariant']['product']['attributes'][0]['values'][0]['name']
-            color = data['productVariant']['product']['attributes'][1]['values'][0]['name']
-            size = data['productVariant']['product']['attributes'][2]['values'][0]['name']
-            fabric = data['productVariant']['product']['attributes'][3]['values'][0]['name']
-            condition = data['productVariant']['product']['attributes'][4]['values'][0]['name']
-            #quality = data['productVariant']['product']['attributes'][5]['values'][0]['name']
-            #defects = data['productVariant']['product']['attributes'][6]['values'][0]['name']
+            category = result['productVariant']['product']['category']['name']
+            image1 = result['productVariant']['product']['media'][0]['url']
+            image2 = result['productVariant']['product']['media'][1]['url']
+            brand = result['productVariant']['product']['attributes'][0]['values'][0]['name']
+            color = result['productVariant']['product']['attributes'][1]['values'][0]['name']
+            size = result['productVariant']['product']['attributes'][2]['values'][0]['name']
+            fabric = result['productVariant']['product']['attributes'][3]['values'][0]['name']
+            condition = result['productVariant']['product']['attributes'][4]['values'][0]['name']
 
-            print('Assigned variables: -------------')
+            print('Assigned variables based on the GraphQL query\'s result:')
             print(image1, image2, brand, color, size, fabric, condition, category)
-            #print(image1, image2, brand, color, size, fabric, condition, quality, defects)
-
-            image1_file = download_image_from_url(image1)
-            image2_file = download_image_from_url(image2)
 
             form = RecordITForm(initial={'Category': category, 'Mark': brand, 'Color': color, 'Size': size, 'Fabric': fabric, 'Wear': condition})
             context = {'form': form, 'image1': image1, 'image2': image2}
         else:
-            print('NIe wchodzi do ifa--------------')
+            print('The method is GET even though the button that adds tags was clicked')
             form = RecordITForm(request.GET)
     else:
         form = RecordITForm()
@@ -221,94 +197,3 @@ def create_it_record(request):
         return render(request, 'createIt.html', context)
     else:
         return render(request, 'createIt.html', {'form': form})
-
-
-# OF COURSE IT'S ONLY EXAMPLE WITH JSON AS STRING
-# json_string = """
-# {
-#     "productVariant": {
-#         "product": {
-#             "media": [
-#                 {
-#                     "url": "https://example.com/products/photo_1132466587739927487_0bbfa6be.jpg"
-#                 },
-#                 {
-#                     "url": "https://example.com/products/photo_170064535416482196_f1f96473.jpg"
-#                 }
-#             ],
-#             "attributes": [
-#                 {
-#                     "attribute": {
-#                         "name": "Marka odzież męska"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "inna"
-#                         }
-#                     ]
-#                 },
-#                 {
-#                     "attribute": {
-#                         "name": "Kolor"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "granatowy"
-#                         }
-#                     ]
-#                 },
-#                 {
-#                     "attribute": {
-#                         "name": "Rozmiar"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "XL"
-#                         }
-#                     ]
-#                 },
-#                 {
-#                     "attribute": {
-#                         "name": "Materiał"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "bawełna"
-#                         }
-#                     ]
-#                 },
-#                 {
-#                     "attribute": {
-#                         "name": "Stan"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "Używany z defektem"
-#                         }
-#                     ]
-#                 },
-#                 {
-#                     "attribute": {
-#                         "name": "Jakość"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "Shop Mix"
-#                         }
-#                     ]
-#                 },
-#                 {
-#                     "attribute": {
-#                         "name": "Wady"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "zmechacenie"
-#                         }
-#                     ]
-#                 }
-#             ]
-#         }
-#     }
-# }
-# """

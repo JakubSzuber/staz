@@ -1,25 +1,27 @@
+from fastapi import FastAPI, UploadFile, HTTPException, Security
+from fastapi_healthcheck import HealthCheckFactory, healthCheckRoute
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer
+from fastapi.responses import FileResponse
+from fastapi.security.api_key import APIKeyQuery, APIKeyCookie, APIKeyHeader
+from starlette.status import HTTP_403_FORBIDDEN
+from gql import gql, Client
+from gql.transport.aiohttp import AIOHTTPTransport
 import boto3
 from PIL import Image
 import os
 import openai
 import requests
 from dotenv import dotenv_values
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Request, UploadFile, File, Form, Depends, HTTPException, status, Security
-from fastapi_healthcheck import HealthCheckFactory, healthCheckRoute
-from fastapi.security import OAuth2PasswordBearer
-from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.security.api_key import APIKeyQuery, APIKeyCookie, APIKeyHeader, APIKey
-from starlette.status import HTTP_403_FORBIDDEN
 
 
 # Load the environment variables from the .env file
 env = dotenv_values()
 
 API_KEYS = [
-    "9d207bf0-10f5-4d8f-a479-22ff5aeff8d1",
-    "f47d4a2c-24cf-4745-937e-620a5963c0b8",
-    "b7061546-75e8-444b-a2c4-f19655d07eb8",
+    env['API_KEY_1'],
+    env['API_KEY_2'],
+    env['API_KEY_3'],
 ]
 
 API_KEY_NAME = "access_token"
@@ -32,7 +34,6 @@ api_key_cookie = APIKeyCookie(name=API_KEY_NAME, auto_error=False)
 openai.api_key = env['OPENAI_API']
 client = boto3.client('rekognition', region_name='eu-central-1')
 URL = "https://api.openai.com/v1/chat/completions"
-
 
 payload = {
   "model": "gpt-3.5-turbo",
@@ -55,7 +56,6 @@ def image_caption_generator(image_path, tag_category, tag_mark, tag_color, tag_s
   if not os.path.exists('tmp'):
     os.makedirs('tmp')
 
-  # Open the original image
   img = Image.open(image_path)
 
   if img.mode in ('RGBA', 'P'):
@@ -63,13 +63,9 @@ def image_caption_generator(image_path, tag_category, tag_mark, tag_color, tag_s
 
   img.save(image_path, 'JPEG')
 
-  # Set the desired size for the resized image
   new_size = (100, 100)
 
-  # Resize the image
   resized_img = img.resize(new_size)
-
-  # Save the resized image
   resized_img.save('tmp/tmp.jpg')
 
   with open('tmp/tmp.jpg', 'rb') as image:
@@ -127,23 +123,18 @@ app.add_middleware(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-from gql import gql, Client
-from gql.transport.aiohttp import AIOHTTPTransport
-
 def gen_tags(sku_value):
-    graphql_token = env['GRAPHQL_TOKEN']
-
     transport = AIOHTTPTransport(url="https://saleor.gammasoft.pl/graphql/")
-
-    # Create a GraphQL client using the defined transport
     client = Client(transport=transport, fetch_schema_from_transport=True)
 
-    # TODO Provide a GraphQL query (not final)
     query = gql(
         """
         query ($sku: String) {
           productVariant(sku: $sku, channel:"fashion4you") {
             product {
+              category {
+                name
+              }
               media {
                 url
               }
@@ -159,124 +150,16 @@ def gen_tags(sku_value):
           }
         }
     """)
-    print(query)
+    print(f'GraphQL Query: {query}')
+
     variables = {
         "sku": sku_value
     }
     result = client.execute(query, variable_values=variables)
-    #result = client.execute(query)
-    print(result)
+
+    print(f"Result of GraphQL Query: {result}")
+
     return(result)
-
-
-# TODO below code to parse result:
-# import json
-#
-# OF COURSE IT'S ONLY EXAMPLE WITH JSON AS STRING
-# json_string = """
-# {
-#     "productVariant": {
-#         "product": {
-#             "media": [
-#                 {
-#                     "url": "https://example.com/products/photo_1132466587739927487_0bbfa6be.jpg"
-#                 },
-#                 {
-#                     "url": "https://example.com/products/photo_170064535416482196_f1f96473.jpg"
-#                 }
-#             ],
-#             "attributes": [
-#                 {
-#                     "attribute": {
-#                         "name": "Marka odzież męska"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "inna"
-#                         }
-#                     ]
-#                 },
-#                 {
-#                     "attribute": {
-#                         "name": "Kolor"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "granatowy"
-#                         }
-#                     ]
-#                 },
-#                 {
-#                     "attribute": {
-#                         "name": "Rozmiar"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "XL"
-#                         }
-#                     ]
-#                 },
-#                 {
-#                     "attribute": {
-#                         "name": "Materiał"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "bawełna"
-#                         }
-#                     ]
-#                 },
-#                 {
-#                     "attribute": {
-#                         "name": "Stan"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "Używany z defektem"
-#                         }
-#                     ]
-#                 },
-#                 {
-#                     "attribute": {
-#                         "name": "Jakość"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "Shop Mix"
-#                         }
-#                     ]
-#                 },
-#                 {
-#                     "attribute": {
-#                         "name": "Wady"
-#                     },
-#                     "values": [
-#                         {
-#                             "name": "zmechacenie"
-#                         }
-#                     ]
-#                 }
-#             ]
-#         }
-#     }
-# }
-# """
-#
-# data = json.loads(json_string)
-#
-# image1 = data['productVariant']['product']['media'][0]['url']
-# image2 = data['productVariant']['product']['media'][1]['url']
-# brand = data['productVariant']['product']['attributes'][0]['values'][0]['name']
-# color = data['productVariant']['product']['attributes'][1]['values'][0]['name']
-# size = data['productVariant']['product']['attributes'][2]['values'][0]['name']
-# fabric = data['productVariant']['product']['attributes'][3]['values'][0]['name']
-# condition = data['productVariant']['product']['attributes'][4]['values'][0]['name']
-# quality = data['productVariant']['product']['attributes'][5]['values'][0]['name']
-# defects = data['productVariant']['product']['attributes'][6]['values'][0]['name']
-#
-#
-# print(image1, image2, brand, color, size, fabric, condition, quality, defects)
-
 
 
 # ---------------------------------------------- Endpoint ----------------------------------------------
@@ -293,17 +176,21 @@ def read_root(
 ):
     file_location = f"files/{image1.filename}"
     os.makedirs(os.path.dirname(file_location), exist_ok=True)
+
     with open(file_location, "wb+") as file_object:
         file_object.write(image1.file.read())
+
     return {"Description": image_caption_generator(file_location, tag_category, tag_mark, tag_color, tag_size, tag_fabric, tag_wear)}
+
 
 @app.get("/sku-tags")
 def return_tags(sku_number: str, api_key: str = Security(get_api_key)):
     tags_json = gen_tags(sku_number)
     return tags_json
 
-@app.get("/test-return-image")  # Not secure enpoint for tetsing purposes
-def return_image():
+
+@app.get("/test-return-image")
+def return_image(api_key: str = Security(get_api_key)):
     base_directory = os.path.dirname(os.path.abspath(__file__))
     file_location = os.path.join(base_directory, "tmp/tmp.jpg")
     return FileResponse(file_location, media_type="image/jpeg")
