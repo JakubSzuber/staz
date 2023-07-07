@@ -10,3 +10,6 @@ Commands to execute compose:
 - `docker compose --env-file ../api_container/.env up -d --build`
 
 Furthermore, my_tennis_club-web-1 container among others on initial execution requires `python manage.py migrate`.
+
+
+TODO enhance readme and repo name, tags, ect
