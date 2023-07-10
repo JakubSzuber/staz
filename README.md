@@ -26,3 +26,10 @@ https://github.com/JakubSzuber/staz/assets/90647840/4d5e92c8-b9a1-40c9-b7f9-407d
 - `docker compose --env-file ../api_container/.env up -d --build`
 
 > Furthermore, my_tennis_club-web-1 container, among others, on initial execution requires `python manage.py migrate`
+
+# Main files
+
+There are 3 main files that have a core role in the functionality of this software:
+- [File](https://github.com/JakubSzuber/staz/blob/main/my_tennis_club/members/views.py) that among others communicates with GraphQL backend to receive the image tags and links of images that are stored in public AWS S3 Buckets
+- [File](https://github.com/JakubSzuber/staz/blob/main/api_container/gen_description.py) that among others generates additional tags based on the image and generates the description
+- [File](https://github.com/JakubSzuber/staz/blob/main/my_tennis_club/members/templates/createIt.html) that is responsible for the user interface (HTML template)
