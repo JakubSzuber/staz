@@ -1,21 +1,22 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
-<head>
-  <link rel="stylesheet" href="{% static 'myglobal.css' %}">
-  <title>{% block title %}{% endblock %}</title>
-</head>
-<body>
+  <head>
+    <link rel="stylesheet" href="{% static 'myglobal.css' %}">
+    <title>{% block title %}{% endblock %}</title>
+  </head>
+  <body>
 
-<div class="topnav">
-  <a href="/">HOME</a> |
-  <a href="/members">MEMBERS</a> |
-  <a href="/create">CREATE</a> |
-  <a href="/items">ITEMS</a>
-</div>
+    <div class="topnav">
+      <a href="/">HOME</a> |
+      <a href="/members">MEMBERS</a> |
+      <a href="/create">CREATE</a> |
+      <a href="/items">ITEMS</a>
+    </div>
 
-{% block content %}
-{% endblock %}
+    {% block content %}
+    {% endblock %}
 
-</body>
+  </body>
+
 </html>
